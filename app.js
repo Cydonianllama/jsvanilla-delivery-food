@@ -48,10 +48,15 @@ const utils = (function(){
     let part1Product = 'product-'
     return {
         genetareID_Order : () => {
-            let numberGenerated = Math.random()*10000
-            let completeId = part1Order+numberGenerated.toString()
+            let numberGenerated = Math.random()*10000;
+            let completeId = part1Order+numberGenerated.toString();
             return completeId
-        }
+        },
+        generateID_Product : () => {
+            let numberGenerated = Math.random()*10000;
+            let completeId = part1Product+numberGenerated.toString()
+            return completeId
+        },
     }
 })()
 
@@ -455,6 +460,34 @@ class OptionsItemCurrentOrder {
 
 }
 
+const CATEGORY_DELIVERY_ONLY_THIS = 'CATEGORY_DELIVERY_ONLY_THIS'
+const CATEGORY_DELIVERY_ACCEPT_MORE = 'CATEGORY_DELIVERY_ACCEPT_MORE'
+
+const FactoryCurrentOrder = (type) => {
+    const strong = document.createElement('strong')
+    switch(type){
+        case CATEGORY_DELIVERY_ONLY_THIS:
+            strong.innerText = 'producto individual'
+            return strong
+        case CATEGORY_DELIVERY_ACCEPT_MORE:
+            strong.innerText = 'elige mas'
+            return strong
+    }
+}
+
+const UtilsCurrentOrder = {
+    getCurrentCategoryDelivery(type){
+        switch(type){
+            case 'only-this':
+                return CATEGORY_DELIVERY_ONLY_THIS
+            case 'accept-more':
+                return CATEGORY_DELIVERY_ACCEPT_MORE
+        }
+    },
+    renderConsideringCategoryDelivery(type, container){
+        container.append(FactoryCurrentOrder(type))
+    }
+}
 class ItemCurrentOrder {
 
     constructor(){
@@ -477,7 +510,8 @@ class ItemCurrentOrder {
         const { name, categoryDelivery} = this.data
         let template = `
             <h3>${name}</h3>
-            ${categoryDelivery}
+            <small>${categoryDelivery}</small>
+            <div class = "current-order-spec" ></di>
             <button class = "btn-item-current-order-remove" >remove</button>
         `
         div.innerHTML = template
@@ -486,9 +520,16 @@ class ItemCurrentOrder {
     }
 
     render(container){
+        
         let component = this.getTemplate()
         container.append(component)
         this.listeners()
+
+        //this secrion render a component for category delivery
+        let categoryConst = UtilsCurrentOrder.getCurrentCategoryDelivery(this.data.categoryDelivery)
+        const containerSpec = this.currentComponent.querySelector('.current-order-spec')
+        UtilsCurrentOrder.renderConsideringCategoryDelivery(categoryConst,containerSpec)
+
     }
 
     setData(data){
@@ -671,6 +712,7 @@ class RestaurantCard {
         
         const VisitRestaurantArea = component.querySelector('.restaurant-card-btn-visit')
         VisitRestaurantArea.addEventListener('click',()=>{
+            // before render call the data of the restaurant
             restaurantContext.populateDataCurrentRestaurant(this.data.id)
             pageContext.changeContet('restaurantview')
         })
@@ -952,6 +994,7 @@ class SwitchModeApp {
     getTemplate() {
         let div = document.createElement('div')
         let template = `
+            <label for = "switch-mode-app" >Switch Modes</label>
             <input id = "switch-mode-app" type = "checkbox" />
         `
         div.innerHTML = template
